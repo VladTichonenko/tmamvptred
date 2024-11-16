@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .calculator-container, .result-container {
+            background-color: #000000df;
+            padding: 20px;
+            border-radius: 15px;
+            width: 300px;
+            box-shadow: 0px 0px 40px rgba(0, 170, 255, 0.4);
+            text-align: center;
+        }
+        .calculator-container h2, .result-container h2 {
+            color: #4c8cff;
+        }
+        label {
+            font-size: 0.9em;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            margin: 8px 0;
+            padding: 5px;
+            border-radius: 5px;
+            border: none;
+            background-color: #303030;
+            color: #ffffff;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #04486a;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #4c8cff;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            position: absolute;
+            top: 10px;
+            padding: 10px;
+        }
+        .back-button {
+            cursor: pointer;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4c8cff;
+            margin-left: 10px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            transition: color 0.3s, transform 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <!-- Крестик в верхнем углу открывает index1.html -->
+        <span class="back-button" onclick="goToHome()"><i class="fa-solid fa-circle-xmark"></i></span>
+    </div>
+
+    <div class="calculator-container" id="calculator">
+        <h2>Cryptocurrency Calculator</h2>
+
+        <!-- Cryptocurrency selection -->
+        <label for="crypto">Cryptocurrency:</label>
+        <select id="crypto">
+            <option value="btc">BTC</option>
+            <option value="doge">DOGE</option>
+        </select>
+
+        <!-- Input sliders for parameters -->
+        <label for="deposit">Deposit ($):</label>
+        <input type="number" id="deposit" min="10" max="10000" step="10" value="1000">
+
+        <label for="leverage">Leverage (x):</label>
+        <input type="number" id="leverage" min="1" max="100" value="10">
+
+        <label for="entry">Opening Price ($):</label>
+        <input type="number" id="entry" min="1" max="100000" step="1" value="20000">
+
+        <label for="stopLoss">Stop-Loss ($):</label>
+        <input type="number" id="stopLoss" min="1" max="100000" step="1" value="19000">
+
+        <label for="takeProfit">Take-Profit ($):</label>
+        <input type="number" id="takeProfit" min="1" max="100000" step="1" value="0">
+
+        <!-- Calculate button -->
+        <button class="button" id="calculate">Calculate</button>
+    </div>
+
+    <div class="result-container" id="result" style="display: none;">
+        <!-- Result will be inserted here -->
+    </div>
+
+    <script>
+        // Функция для перехода на главную страницу
+        function goToHome() {
+            window.location.href = 'index1.html';
+        }
+
+        // Функция для возврата к калькулятору
+        function backToCalculator() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('calculator').style.display = 'block';
+        }
+
+        document.getElementById('calculate').onclick = () => {
+            const deposit = parseFloat(document.getElementById('deposit').value);
+            const leverage = parseFloat(document.getElementById('leverage').value);
+            const openingPrice = parseFloat(document.getElementById('entry').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const takeProfit = parseFloat(document.getElementById('takeProfit').value);
+
+            if (deposit <= 0 || leverage <= 0 || openingPrice <= 0 || stopLoss <= 0 || takeProfit < 0) {
+                alert("All values must be positive and non-zero.");
+                return;
+            }
+
+            const coinQuantity = (deposit / openingPrice) * leverage;
+            const takeProfitPrice = openingPrice + (takeProfit / coinQuantity);
+            const stopLossPrice = openingPrice - (stopLoss / coinQuantity);
+
+            document.getElementById('calculator').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').innerHTML = `
+                <h2>Results</h2>
+                <p>Coin Quantity: ${coinQuantity.toFixed(6)}</p>
+                <p>Take-Profit Price: $${takeProfitPrice.toFixed(2)}</p>
+                <p>Stop-Loss Price: $${stopLossPrice.toFixed(2)}</p>
+                <button class="button" onclick="backToCalculator()">Back</button>
+            `;
+        };
+    </script>
+</body>
+</html>

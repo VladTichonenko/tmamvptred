@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Chart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    /* Основные стили для страницы */
+    body {
+      margin: 0;
+      background-color: #000; /* Задний фон сайта */
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Панель выбора пары на всю ширину */
+    .symbol-select-container {
+      width: 100%;
+      background-color: #333; /* Темно-серый фон */
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 2px solid #4c8cff; /* Голубая обводка */
+    }
+
+    .symbol-select-container label {
+      color: #4c8cff; /* Голубой текст */
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    #symbolSelect {
+      padding: 5px;
+      font-size: 16px;
+      background-color: #333;
+      color: #4c8cff;
+      border: 1px solid #4c8cff; /* Голубая обводка */
+      border-radius: 4px;
+    }
+
+    /* Стили для TradingView графика */
+    .tradingview-widget-container {
+      height: 62vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .chart {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .chart.full-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+      background-color: #000;
+    }
+
+    /* Стили для нижней навигационной панели */
+     /* Стили для нижней навигации */
+ .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 65px;
+    background-color: #1e1e1e;
+    border-top: 2px solid #4c8cff;
+}
+
+.nav-item {
+    color: #4c8cff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.nav-item.active {
+    color: #ffffff;
+}
+
+.nav-item:hover {
+    color: #ffffff;
+}
+    /* Стили для бокового меню */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 250px;
+      height: 100%;
+      background-color: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      transition: left 0.3s;
+      z-index: 100;
+    }
+
+    .side-menu .menu-content p {
+      margin: 20px 0;
+      cursor: pointer;
+    }
+
+    .side-menu.show {
+      left: 0;
+    }
+
+    /* Стили для кнопки бургер */
+    .burger-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px; /* Размещаем кнопку справа */
+  z-index: 101;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 20px;
+}
+
+.burger-btn div {
+  width: 100%;
+  height: 4px;
+  background-color: #fff;
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- Кнопка бургер для открытия бокового меню -->
+  <div class="burger-btn" id="burger-btn">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <!-- Боковое меню -->
+  <div class="side-menu" id="side-menu">
+    <div class="menu-content">
+        <p>Profile</p>
+        <p>Settings</p>
+        <p>Help</p>
+        <p id="bitry-link">BiTry-Studio <i class="fa-solid fa-code"></i></p>
+    </div>
+  </div>
+
+  <!-- Панель выбора криптовалютной пары -->
+  <div class="symbol-select-container">
+    <label for="symbolSelect"><i class="fa-solid fa-arrow-right-arrow-left"></i></label>
+    <select id="symbolSelect" onchange="changeSymbol(this.value)">
+      <option value="BINANCE:IOTAUSD">IOTA/USD</option>
+      <option value="BINANCE:BTCUSD">BTC/USD</option>
+      <option value="BINANCE:ETHUSD">ETH/USD</option>
+      <option value="BINANCE:BNBUSD">BNB/USD</option>
+    </select>
+  </div>
+
+  <!-- Контейнер для графика -->
+  <div class="tradingview-widget-container">
+    <div id="tradingview_chart" class="chart"></div>
+
+    <!-- Навигационная панель внизу -->
+    <nav class="bottom-nav">
+      <div class="nav-item" id="open-glav"><i class="fa-solid fa-house" id="home-icon"></i></div>
+      <div class="nav-item active" id="open-chart"><i class="fa-solid fa-chart-line"></i></div> <!-- Сделали второй элемент активным (белым) -->
+      <div class="nav-item" id="open-search"><i class="fa-regular fa-newspaper"></i></div>
+      <div class="nav-item"><i class="fa-solid fa-star"></i></div>
+    </nav>
+  </div>
+
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+    function loadChart(symbol) {
+      new TradingView.widget({
+        "autosize": true,
+        "symbol": symbol,
+        "interval": "D",
+        "timezone": "Etc/UTC",
+        "theme": "Dark",
+        "style": "1",
+        "locale": "en",
+        "container_id": "tradingview_chart"
+      });
+    }
+
+    loadChart("BINANCE:IOTAUSD");
+
+    function changeSymbol(newSymbol) {
+      document.getElementById("tradingview_chart").innerHTML = "";
+      loadChart(newSymbol);
+    }
+
+    function toggleFullScreen() {
+      const chart = document.getElementById("tradingview_chart");
+      chart.classList.toggle("full-screen");
+    }
+
+    // Добавляем обработчики для навигационной панели
+    document.getElementById('open-glav').addEventListener('click', function() {
+      window.location.href = 'index1.html';  // Перейти на главную
+    });
+
+    document.getElementById('open-chart').addEventListener('click', function() {
+      window.location.href = 'Chart.html';  // Открыть график
+    });
+
+    document.getElementById('open-search').addEventListener('click', function() {
+      window.location.href = 'graf.html';
+    });
+
+    // Управление активным состоянием кнопок
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelector('.nav-item.active').classList.remove('active');
+        item.classList.add('active');
+      });
+    });
+
+    // Управление открытием/закрытием бокового меню
+    document.getElementById('burger-btn').addEventListener('click', function() {
+      document.getElementById('side-menu').classList.toggle('show');
+    });
+
+    document.getElementById('bitry-link').addEventListener('click', function () {
+        window.open('https://t.me/ITtbcstudio', '_blank'); // Открывает ссылку в новой вкладке
+    });
+  </script>
+
+</body>
+</html>
